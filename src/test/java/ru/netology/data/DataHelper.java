@@ -34,6 +34,7 @@ public class DataHelper {
     public static VerificationCode generateRandomVerificationCode() {
         return new VerificationCode(FAKER.numerify("######"));
     }
+
     @Value
     public static class AuthInfo {
         String login;

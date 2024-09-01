@@ -1,9 +1,9 @@
 package ru.netology.test;
 
 import org.junit.jupiter.api.*;
-import ru.netology.page.LoginPage;
 import ru.netology.data.DataHelper;
 import ru.netology.data.SQLHelper;
+import ru.netology.page.LoginPage;
 
 import static com.codeborne.selenide.Selenide.open;
 import static ru.netology.data.SQLHelper.cleanAuthCodes;
@@ -16,10 +16,12 @@ public class LoginTest {
     void tearDown() {
         cleanAuthCodes();
     }
+
     @AfterAll
     static void tearDownAll() {
         cleanDatabase();
     }
+
     @BeforeEach
     void setUp() {
         loginPage = open("http://localhost:9999", LoginPage.class);
@@ -36,14 +38,21 @@ public class LoginTest {
     }
 
     @Test
-    @DisplayName("Unsuccessful login")
-    void shouldUnsuccessfulLogin() {
+    @DisplayName("Error message with existing user")
+    void ErrorMessageWithExistingUser() {
         var authInfo = DataHelper.generateRandomUser();
         loginPage.validLogin(authInfo);
-        loginPage.verifyErrorNotification("Ошибка! Неверно указан логин или пароль");
+        loginPage.verifyErrorNotification("Ошибка! \nНеверно указан логин или пароль");
     }
 
-
-
-
+    @Test
+    @DisplayName("Error message with active user login and random verification code")
+    void ErrorMessageWithActiveUserLoginAndRandomVerificationCode() {
+        var authInfo = DataHelper.getAuthInfoWithTestData();
+        var verificationPage = loginPage.validLogin(authInfo);
+        verificationPage.verifyVerificationPageVisiblity();
+        var verificationCode = DataHelper.generateRandomVerificationCode();
+        verificationPage.verify(verificationCode.getCode());
+        verificationPage.verifyErrorNotification("Ошибка! \nНеверно указан код! Попробуйте ещё раз.");
+    }
 }
